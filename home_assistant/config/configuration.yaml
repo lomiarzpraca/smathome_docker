@@ -1,0 +1,100 @@
+
+# Configure a default setup of Home Assistant (frontend, api, etc)
+default_config:
+
+# Text to speech
+tts:
+  - platform: google_translate
+
+group: !include groups.yaml
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+wake_on_lan:
+
+# co trzymac w bazie danych historycznych akcji
+recorder:
+  purge_keep_days: 5
+  # db_url: sqlite:////home/user/.homeassistant/test
+
+
+# webostv:
+#   host: <adres_ip>
+#   name: OLED
+#   turn_on_action:
+#     service: wake_on_lan.send_magic_packet
+#     data:
+#       mac: <mac_telewizora>
+#   customize:
+#     sources:
+#       - livetv
+#       - youtube
+#       - hbogo
+#       - netflix
+
+# yeelight:
+#   devices:
+#     <adres_ip>:
+#       name: Lampka salon stol
+#       model: mono1
+#       # save_on_change: false
+#     <adres_ip>:
+#       name: Lampka salon kolor kanapa
+#       model: color2
+#       # save_on_change: true
+
+# light:
+#   - platform: xiaomi_miio
+#     name: Lampka TV szafka
+#     host: <adres_ip>
+#     token: <token>
+#     model: philips.light.bulb
+#   - platform: mqtt
+#     name: lampka salon duza
+#     state_topic: "stat/salon_stol_duza/POWER"
+#     command_topic: "cmnd/salon_stol_duza/POWER"
+#     qos: 1
+#     payload_on: "ON"
+#     payload_off: "OFF"
+#     retain: false
+
+# vacuum:
+#   - platform: xiaomi_miio
+#     name: odkurzacz
+#     host: <adres_ip>
+#     token: <token>
+
+mqtt:
+  discovery: true
+  broker: mqtt
+  port: 1883
+  # client_id: home-assistant
+  # username: <login>
+  # password: <haslo>
+
+# influxdb:
+#   host: <adres_ip>
+#   include:
+#     domains:
+#       - sensor
+
+# ## KAMERKI
+# stream:
+# ffmpeg:
+
+sensor:
+  - platform: template
+    sensors:
+      nextsunrise:
+        entity_id: sun.sun
+        friendly_name: 'wschod slonca'
+        value_template: >
+          {{ as_timestamp(states.sun.sun.attributes.next_rising) | timestamp_custom(' %H:%M') | replace(" 0", "") }}
+        icon_template: mdi:weather-sunset-up
+      nextsunset:
+        entity_id: sun.sun
+        friendly_name: 'zachod slonca'
+        value_template: >
+          {{ as_timestamp(states.sun.sun.attributes.next_setting) | timestamp_custom(' %H:%M') | replace(" 0", "") }}
+        icon_template: mdi:weather-sunset-down
