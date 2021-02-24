@@ -1,12 +1,11 @@
 version: '2'
 services:
-
 # HOME ASSISTANT
   homeassistant:
     container_name: homeassistant
     image: homeassistant/home-assistant:stable
-    ports:
-      - "8123:8123/tcp"
+    # ports:
+    #   - "8123:8123/tcp"
     network_mode: host
     volumes:
       - './home_assistant/config/:/config/'
@@ -22,6 +21,7 @@ services:
       - mqtt
       - zigbee2mqtt
       - duckdns
+      - nodered
       # - swag
 
 # MQTT
@@ -48,41 +48,54 @@ services:
         max-size: "1m"
         max-file: "10"
 
-# ZIGBEE2MQTT
+# # ZIGBEE2MQTT
+#   zigbee2mqtt: # https://www.zigbee2mqtt.io/information/docker.html
+#     container_name: zigbee2mqtt
+#     image:  koenkk/zigbee2mqtt:latest #1.6.0
+#     restart: always
+#     # network_mode: host
+#     privileged: true
+#     volumes:
+#       - ./zigbee2mqtt/data:/app/data
+#     environment:
+#       - TZ=Europe/Warsaw    
+#     devices:
+#       - /dev/ttyS0:/dev/ttyACM0 # to check usb position > ls -ltr /dev/tty*|tail -n 1
+#     depends_on:
+#       - mqtt
 
-  zigbee2mqtt: # https://www.zigbee2mqtt.io/information/docker.html
-    container_name: zigbee2mqtt
-    image:  koenkk/zigbee2mqtt:latest #1.6.0
+# # DUCKDNS - Dynamic DNS provider
+#   duckdns:
+#     image: linuxserver/duckdns
+#     container_name: duckdns
+#     environment:
+#       - PUID=1000 #optional
+#       - PGID=1000 #optional
+#       - TZ=Europe/Warsaw
+#       - SUBDOMAINS=<twoja_domena>         # WPISZ SWOJE DANE
+#       - TOKEN=<twoj_token>                # WPISZ SWOJE DANE
+#       - LOG_FILE=true #optional
+#     network_mode: host
+#     logging:
+#       driver: "json-file"
+#       options:
+#         max-size: "1m"
+#         max-file: "10"
+#     restart: always
+
+
+# # NODE-RED
+  nodered:
+    container_name: nodered
+    # ports:
+    #     - "1880:1880"
     restart: always
-    # network_mode: host
-    privileged: true
     volumes:
-      - ./zigbee2mqtt/data:/app/data
-    environment:
-      - TZ=Europe/Warsaw    
-    devices:
-      - /dev/ttyS0:/dev/ttyACM0 # to check usb position > ls -ltr /dev/tty*|tail -n 1
-    depends_on:
-      - mqtt
-
-# DUCKDNS - Dynamic DNS provider
-  duckdns:
-    image: linuxserver/duckdns
-    container_name: duckdns
-    environment:
-      - PUID=1000 #optional
-      - PGID=1000 #optional
-      - TZ=Europe/Warsaw
-      - SUBDOMAINS=<twoja_domena>         # WPISZ SWOJE DANE
-      - TOKEN=<twoj_token>    # WPISZ SWOJE DANE
-      - LOG_FILE=true #optional
+        - ./node-red:/data/
+        - /etc/localtime:/etc/localtime:ro 
+        - /etc/TZ:/etc/timezone:ro
+    image: nodered/node-red
     network_mode: host
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "1m"
-        max-file: "10"
-    restart: always
 
 # # SWAG - reverse proxy + certification
 #   swag:
